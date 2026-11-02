@@ -37,6 +37,37 @@ pipeline {
                 sh 'npm run build'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t permix:devops-v1 .'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    docker rm -f permix || true
+
+                    docker run -d \
+                        --name permix \
+                        --restart unless-stopped \
+                        -p 8085:80 \
+                        permix:devops-v1
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    sleep 5
+                    docker ps --filter name=^/permix$
+                    docker exec permix wget -qO- http://localhost/ > /dev/null
+                    echo "PermiX deployment successful!"
+                '''
+            }
+        }
     }
 
     post {
@@ -46,11 +77,11 @@ pipeline {
         }
 
         success {
-            echo 'PermiX CI pipeline completed successfully!'
+            echo 'PermiX CI/CD pipeline completed successfully!'
         }
 
         failure {
-            echo 'PermiX CI pipeline failed. Check the console output.'
+            echo 'PermiX pipeline failed. Check the console output.'
         }
     }
 }
