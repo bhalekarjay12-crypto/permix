@@ -63,7 +63,7 @@ pipeline {
                 sh '''
                     sleep 5
                     docker ps --filter name=^/permix$
-                    docker exec permix wget -qO- http://localhost/ > /dev/null
+                    docker exec permix wget -qO- http://127.0.0.1/ > /dev/null
                     echo "PermiX deployment successful!"
                 '''
             }
