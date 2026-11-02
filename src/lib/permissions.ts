@@ -161,9 +161,12 @@ export function parseSymbolicMode(value: string): {
   symbolic: string
 } {
   const trimmed = value.trim()
-  const digits = trimmed.replace(/^[-dcbpls]/, '')
+  const hasFileType = /^[-dcbpls]/.test(trimmed)
+  const text = hasFileType ? trimmed.slice(1) : trimmed
 
-  if (!/^[r-][w-][xStsT-]{3}$/.test(digits) && !/^[r-][w-][xStsT-]{9}$/.test(trimmed)) {
+  const validPattern = /^[r-][w-][xsS-][r-][w-][xsS-][r-][w-][xtT-]$/
+
+  if (!validPattern.test(text)) {
     return {
       valid: false,
       permissions: defaultGroups,
@@ -171,10 +174,6 @@ export function parseSymbolicMode(value: string): {
       symbolic: 'rwxr-xr-x',
     }
   }
-
-  const text = trimmed.startsWith('-') || trimmed.startsWith('d') || trimmed.startsWith('l') || trimmed.startsWith('c') || trimmed.startsWith('b') || trimmed.startsWith('p') || trimmed.startsWith('s')
-    ? trimmed.slice(1)
-    : trimmed
 
   const owner = text.slice(0, 3)
   const group = text.slice(3, 6)
